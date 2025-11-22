@@ -55,13 +55,16 @@ func testReadAt(t *testing.T, s *store) {
 		n, err := s.ReadAt(b, off)
 		require.NoError(t, err)
 		require.Equal(t, lenWidth, n)
+
 		off += int64(n)
 		size := enc.Uint64(b)
+
 		b = make([]byte, size)
 		n, err = s.ReadAt(b, off)
 		require.NoError(t, err)
 		require.Equal(t, write, b)
 		require.Equal(t, int(size), n)
+
 		off += int64(n)
 	}
 }
@@ -70,14 +73,19 @@ func TestStoreClose(t *testing.T) {
 	f, err := os.CreateTemp("", "store_close_test")
 	require.NoError(t, err)
 	defer os.Remove(f.Name())
+
 	s, err := newStore(f)
 	require.NoError(t, err)
+
 	_, _, err = s.Append(write)
 	require.NoError(t, err)
+
 	f, beforeSize, err := openFile(f.Name())
 	require.NoError(t, err)
+
 	err = s.Close()
 	require.NoError(t, err)
+
 	_, afterSize, err := openFile(f.Name())
 	require.NoError(t, err)
 	require.True(t, afterSize > beforeSize)
