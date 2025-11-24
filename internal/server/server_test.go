@@ -130,13 +130,17 @@ func testConsumePastBoundary(t *testing.T, client api.LogClient, config *Config)
 func testProduceConsumeStream(t *testing.T, client api.LogClient, config *Config) {
 	ctx := context.Background()
 
-	records := []*api.Record{{
-		Value:  []byte("hello world"),
-		Offset: 0,
-	}, {
-		Value:  []byte("goodbye world"),
-		Offset: 1,
-	}}
+	records := []*api.Record{
+		{
+			Value:  []byte("hello world"),
+			Offset: 0,
+		},
+		{
+			Value:  []byte("goodbye world"),
+			Offset: 1,
+		},
+	}
+
 	{
 		stream, err := client.ProduceStream(ctx)
 		require.NoError(t, err)
@@ -157,6 +161,7 @@ func testProduceConsumeStream(t *testing.T, client api.LogClient, config *Config
 			}
 		}
 	}
+
 	{
 		stream, err := client.ConsumeStream(
 			ctx,
