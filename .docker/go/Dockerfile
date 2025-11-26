@@ -8,9 +8,10 @@ RUN go mod download
 
 RUN apt-get update && \
     apt-get install -y unzip protobuf-compiler && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2 && \
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3.0 && \
-    go install github.com/cloudflare/cfssl/cmd/cfssl@v1.6.1 && \
-    go install github.com/cloudflare/cfssl/cmd/cfssljson@v1.6.1
+    curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.5/cfssl_1.6.5_linux_amd64 \
+          -o /usr/local/bin/cfssl && \
+    curl -L https://github.com/cloudflare/cfssl/releases/download/v1.6.5/cfssljson_1.6.5_linux_amd64 \
+          -o /usr/local/bin/cfssljson && \
+    chmod +x /usr/local/bin/cfssl /usr/local/bin/cfssljson
 
 EXPOSE 8080
