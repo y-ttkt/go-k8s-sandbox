@@ -1,26 +1,28 @@
 DC       := docker compose
 SERVICE  := app
-CONFIG_PATH=${HOME}/.proglog/
+CONFIG_DIR  := .proglog
 
 .PHONY: init
 init:
-	mkdir -p ${CONFIG_PATH}
+	$(DC) exec $(SERVICE) sh -c 'mkdir -p $$HOME/$(CONFIG_DIR)'
 
 .PHONY: gencert
-	gencert:
-	cfssl gencert \
-		-initca test/ca-csr.json | cfssljson -bare ca
+gencert:
+	$(DC) exec $(SERVICE) sh -c 'cfssl gencert -initca test/ca-csr.json | cfssljson -bare ca'
 
-	cfssl gencert \
-    	-ca=ca.pem \
-    	-ca-key=ca-key.pem \
-    	-config=test/ca-config.json \
-        -profile=server \
-        test/server-csr.json | cfssljson -bare server
-	mv *.pem *.csr ${CONFIG_PATH}
+	$(DC) exec $(SERVICE) sh -c '\
+		cfssl gencert \
+			-ca=ca.pem \
+			-ca-key=ca-key.pem \
+			-config=test/ca-config.json \
+			-profile=server \
+			test/server-csr.json | cfssljson -bare server \
+	'
+
+	$(DC) exec $(SERVICE) sh -c 'mv *.pem *.csr $$HOME/$(CONFIG_DIR)'
 
 .PHONY: test
-	test:
+test:
 	go test -race ./...
 
 PROTOC_CMD := protoc api/v1/*.proto \
