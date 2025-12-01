@@ -21,10 +21,6 @@ gencert:
 
 	$(DC) exec $(SERVICE) sh -c 'mv *.pem *.csr $$HOME/$(CONFIG_DIR)'
 
-.PHONY: test
-test:
-	go test -race ./...
-
 PROTOC_CMD := protoc api/v1/*.proto \
 	--go_out=. \
 	--go-grpc_out=. \
@@ -35,3 +31,11 @@ PROTOC_CMD := protoc api/v1/*.proto \
 .PHONY: compile
 compile:
 	$(DC) exec $(SERVICE) sh -c '$(PROTOC_CMD)'
+
+.PHONY: shell
+shell:
+	$(DC) exec $(SERVICE) bash
+
+.PHONY: test
+test:
+	$(DC) exec $(SERVICE) go test -race ./...
