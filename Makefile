@@ -19,6 +19,15 @@ gencert:
 			test/server-csr.json | cfssljson -bare server \
 	'
 
+	$(DC) exec $(SERVICE) sh -c '\
+    		cfssl gencert \
+				-ca=ca.pem \
+				-ca-key=ca-key.pem \
+				-config=test/ca-config.json \
+				-profile=client \
+				test/client-csr.json | cfssljson -bare client \
+    	'
+
 	$(DC) exec $(SERVICE) sh -c 'mv *.pem *.csr $$HOME/$(CONFIG_DIR)'
 
 PROTOC_CMD := protoc api/v1/*.proto \
