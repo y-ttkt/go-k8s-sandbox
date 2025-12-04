@@ -20,13 +20,33 @@ gencert:
 	'
 
 	$(DC) exec $(SERVICE) sh -c '\
-    		cfssl gencert \
-				-ca=ca.pem \
-				-ca-key=ca-key.pem \
-				-config=test/ca-config.json \
-				-profile=client \
-				test/client-csr.json | cfssljson -bare client \
-    	'
+    	cfssl gencert \
+			-ca=ca.pem \
+			-ca-key=ca-key.pem \
+			-config=test/ca-config.json \
+			-profile=client \
+			test/client-csr.json | cfssljson -bare client \
+    '
+
+	$(DC) exec $(SERVICE) sh -c '\
+    	cfssl gencert \
+        	-ca=ca.pem \
+        	-ca-key=ca-key.pem \
+        	-config=test/ca-config.json \
+        	-profile=client \
+        	-cn="root" \
+        	test/client-csr.json | cfssljson -bare root-client \
+    '
+
+	$(DC) exec $(SERVICE) sh -c '\
+    	cfssl gencert \
+        	-ca=ca.pem \
+        	-ca-key=ca-key.pem \
+        	-config=test/ca-config.json \
+        	-profile=client \
+        	-cn="nobody" \
+        	test/client-csr.json | cfssljson -bare nobody-client \
+    '
 
 	$(DC) exec $(SERVICE) sh -c 'mv *.pem *.csr $$HOME/$(CONFIG_DIR)'
 
@@ -45,6 +65,13 @@ compile:
 shell:
 	$(DC) exec $(SERVICE) bash
 
+
+.PHONY: setup-policy
+setup-policy: init
+	$(DC) exec $(SERVICE) sh -c 'cp test/model.conf $$HOME/$(CONFIG_DIR)/model.conf'
+	$(DC) exec $(SERVICE) sh -c 'cp test/policy.csv $$HOME/$(CONFIG_DIR)/policy.csv'
+
+
 .PHONY: test
-test:
+test: setup-policy
 	$(DC) exec $(SERVICE) go test -race ./...
