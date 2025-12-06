@@ -39,12 +39,16 @@ func newgrpcServer(config *Config) (srv *grpcServer, err error) {
 }
 
 func NewGRPCServer(config *Config, grpcOpts ...grpc.ServerOption) (*grpc.Server, error) {
-	grpcOpts = append(grpcOpts, grpc.StreamInterceptor(
-		grpc_middleware.ChainStreamServer(
-			grpc_auth.StreamServerInterceptor(authenticate),
-		)), grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-		grpc_auth.UnaryServerInterceptor(authenticate),
-	)))
+	grpcOpts = append(grpcOpts,
+		grpc.StreamInterceptor(
+			grpc_middleware.ChainStreamServer(
+				grpc_auth.StreamServerInterceptor(authenticate),
+			)),
+		grpc.UnaryInterceptor(
+			grpc_middleware.ChainUnaryServer(
+				grpc_auth.UnaryServerInterceptor(authenticate),
+			)),
+	)
 
 	gsrv := grpc.NewServer(grpcOpts...)
 	srv, err := newgrpcServer(config)
@@ -152,6 +156,7 @@ func authenticate(ctx context.Context) (context.Context, error) {
 	ctx = context.WithValue(ctx, subjectContextKey{}, subject)
 	return ctx, nil
 }
+
 func subject(ctx context.Context) string {
 	return ctx.Value(subjectContextKey{}).(string)
 }
